@@ -16,21 +16,25 @@ exports.processReceipt = async (req, res) => {
     const apiKey = "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";
     const endpoint = `https://integrate.api.nvidia.com/v1/chat/completions`;
 
-    const promptText = `Ekstrak informasi dari nota belanja ini. 
-Kembalikan HANYA dalam format JSON murni yang valid.
-ATURAN WAJIB: Anda HARUS menggunakan tanda kutip ganda (") untuk semua nama properti/key dan value string. Dilarang menggunakan kutip tunggal (') atau tanpa kutip pada properti.
-PERINGATAN: BACA ANGKA TANGGAL DAN TOTAL DENGAN SANGAT TELITI! Perhatikan angka tahun (contoh 26 jangan dibaca 24) dan nol pada total belanja.
+    const promptText = `Tugas Anda adalah mengekstrak informasi dari gambar nota belanja (printer dot-matrix).
+Karena ini nota dot-matrix, angka 6 sangat sering terlihat seperti angka 4. BACA DENGAN SANGAT TELITI!
 
-Contoh format yang Benar:
-{"toko": "Nama", "tanggal": "12/12/2023", "total": 50000}
+LANGKAH 1 (TRANSKRIPSI MENTAH):
+Tuliskan seluruh teks dan angka yang Anda lihat di gambar secara persis dari atas sampai bawah. 
 
-Struktur yang diminta:
+LANGKAH 2 (EKSTRAKSI JSON):
+Setelah Anda selesai menuliskan transkrip, buatlah ringkasan datanya dalam format JSON murni.
+ATURAN WAJIB: Anda HARUS menggunakan tanda kutip ganda (") untuk semua nama properti/key dan value string.
+
+Contoh format JSON:
+{"toko": "Nama Toko", "tanggal": "12/12/2023", "total": 50000}
+
+Struktur JSON yang diminta:
 {
   "toko": "Nama Toko (jika tidak ada isi string kosong)",
   "tanggal": "Tanggal nota format DD/MM/YYYY (jika tidak ada isi string kosong)",
-  "total": angka total belanja (hanya integer murni, tanpa Rp atau titik)
-}
-Jangan tambahkan penjelasan apapun, keluarkan JSON saja.`;
+  "total": angka total belanja (integer murni dari tagihan akhir, tanpa Rp/titik/koma)
+}`;
 
     const requestBody = {
       model: "meta/llama-3.2-90b-vision-instruct",
