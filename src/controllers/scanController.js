@@ -15,7 +15,7 @@ exports.processReceipt = async (req, res) => {
     // Kita hapus process.env sama sekali agar Vercel TIDAK mengambil kunci lama 
     // yang mungkin tersangkut di pengaturan Dashboard Vercel Anda.
     const apiKey = "AQ.Ab8RN6KU6hRYt_HZOExYtlU68AiU4v7ptCO-dODt1ZeVleeTiw";
-    const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-pro-latest:generateContent?key=${apiKey}`;
+    const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`;
 
     const promptText = `Ekstrak informasi dari nota belanja ini. 
 Kembalikan HANYA dalam format JSON murni (tanpa blockquote markdown \`\`\`json) dengan struktur berikut:
