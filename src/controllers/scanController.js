@@ -15,7 +15,8 @@ exports.processReceipt = async (req, res) => {
     // Kita hapus process.env sama sekali agar Vercel TIDAK mengambil kunci lama 
     // yang mungkin tersangkut di pengaturan Dashboard Vercel Anda.
     const apiKey = "AQ.Ab8RN6KU6hRYt_HZOExYtlU68AiU4v7ptCO-dODt1ZeVleeTiw";
-    const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`;
+    // Hapus ?key= dari URL, kita akan gunakan Headers
+    const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent`;
 
     const promptText = `Ekstrak informasi dari nota belanja ini. 
 Kembalikan HANYA dalam format JSON murni (tanpa blockquote markdown \`\`\`json) dengan struktur berikut:
@@ -49,11 +50,14 @@ Pastikan output benar-benar hanya string JSON yang bisa di-parse.`;
       }
     };
 
-    // Panggil API Google Gemini
+    // Panggil API Google Gemini dengan metode Header Authentication (lebih aman)
     const response = await fetch(endpoint, {
       method: 'POST',
       headers: { 
-        'Content-Type': 'application/json'
+        'Content-Type': 'application/json',
+        'x-goog-api-key': apiKey,
+        // Coba juga format Bearer jika ternyata kuncinya adalah Token OAuth
+        'Authorization': `Bearer ${apiKey}`
       },
       body: JSON.stringify(requestBody)
     });
