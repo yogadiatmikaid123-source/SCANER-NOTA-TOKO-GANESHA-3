@@ -12,7 +12,9 @@ exports.processReceipt = async (req, res) => {
       });
     }
 
-    const apiKey = process.env.GEMINI_API_KEY;
+    // Karena Vercel terkadang mengabaikan file .env, kita tanamkan (hardcode) langsung di sini
+    // Sesuai izin Anda karena ini API Gratis.
+    const apiKey = process.env.GEMINI_API_KEY || "AQ.Ab8RN6Jt6ija_3G78TtJ0Upvil1L3AQEvrl5VuZjUyaGzR3pog";
     const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`;
 
     const promptText = `Ekstrak informasi dari nota belanja ini. 
