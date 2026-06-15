@@ -19,6 +19,7 @@ exports.processReceipt = async (req, res) => {
     const promptText = `Ekstrak informasi dari nota belanja ini. 
 Kembalikan HANYA dalam format JSON murni yang valid.
 ATURAN WAJIB: Anda HARUS menggunakan tanda kutip ganda (") untuk semua nama properti/key dan value string. Dilarang menggunakan kutip tunggal (') atau tanpa kutip pada properti.
+PERINGATAN: BACA ANGKA TANGGAL DAN TOTAL DENGAN SANGAT TELITI! Perhatikan angka tahun (contoh 26 jangan dibaca 24) dan nol pada total belanja.
 
 Contoh format yang Benar:
 {"toko": "Nama", "tanggal": "12/12/2023", "total": 50000}
@@ -32,7 +33,7 @@ Struktur yang diminta:
 Jangan tambahkan penjelasan apapun, keluarkan JSON saja.`;
 
     const requestBody = {
-      model: "meta/llama-3.2-11b-vision-instruct",
+      model: "meta/llama-3.2-90b-vision-instruct",
       messages: [
         {
           role: "user",
