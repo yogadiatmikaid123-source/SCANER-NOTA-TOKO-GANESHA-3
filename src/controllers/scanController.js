@@ -12,11 +12,8 @@ exports.processReceipt = async (req, res) => {
       });
     }
 
-    // Kita hapus process.env sama sekali agar Vercel TIDAK mengambil kunci lama 
-    // yang mungkin tersangkut di pengaturan Dashboard Vercel Anda.
-    const apiKey = "AQ.Ab8RN6KU6hRYt_HZOExYtlU68AiU4v7ptCO-dODt1ZeVleeTiw";
-    // Hapus ?key= dari URL, kita akan gunakan Headers
-    const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent`;
+    const apiKey = "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";
+    const endpoint = `https://integrate.api.nvidia.com/v1/chat/completions`;
 
     const promptText = `Ekstrak informasi dari nota belanja ini. 
 Kembalikan HANYA dalam format JSON murni (tanpa blockquote markdown \`\`\`json) dengan struktur berikut:
@@ -27,36 +24,32 @@ Kembalikan HANYA dalam format JSON murni (tanpa blockquote markdown \`\`\`json) 
 }
 Pastikan output benar-benar hanya string JSON yang bisa di-parse.`;
 
-    // Format request standar Google Gemini
+    // Format request standar OpenAI untuk Vision API (NVIDIA NIM)
     const requestBody = {
-      contents: [
+      model: "meta/llama-3.2-11b-vision-instruct",
+      messages: [
         {
-          parts: [
-            { text: promptText },
+          role: "user",
+          content: [
+            { type: "text", text: promptText },
             {
-              inline_data: {
-                mime_type: "image/jpeg",
-                data: image
+              type: "image_url",
+              image_url: {
+                url: `data:image/jpeg;base64,${image}`
               }
             }
           ]
         }
       ],
-      generationConfig: {
-        temperature: 0.1,
-        responseMimeType: "application/json",
-        topK: 1,
-        topP: 1
-      }
+      max_tokens: 1024,
+      temperature: 0.1
     };
 
-    // Panggil API Google Gemini dengan metode Header Authentication (lebih aman)
+    // Panggil API NVIDIA
     const response = await fetch(endpoint, {
       method: 'POST',
       headers: { 
         'Content-Type': 'application/json',
-        'x-goog-api-key': apiKey,
-        // Coba juga format Bearer jika ternyata kuncinya adalah Token OAuth
         'Authorization': `Bearer ${apiKey}`
       },
       body: JSON.stringify(requestBody)
@@ -64,16 +57,16 @@ Pastikan output benar-benar hanya string JSON yang bisa di-parse.`;
 
     if (!response.ok) {
       if (response.status === 429) {
-        throw new Error('Server AI sedang sibuk (Rate Limit Gemini). Coba beberapa saat lagi.');
+        throw new Error('Server AI sedang sibuk (Rate Limit NVIDIA). Coba beberapa saat lagi.');
       }
       const errorData = await response.json().catch(() => ({}));
-      throw new Error(errorData.error?.message || `Gagal terhubung ke Google AI API. Status: ${response.status}`);
+      throw new Error(errorData.error?.message || `Gagal terhubung ke NVIDIA API. Status: ${response.status}`);
     }
 
     const data = await response.json();
     
-    // Format response Google Gemini
-    let aiText = data.candidates[0].content.parts[0].text.trim();
+    // Format response OpenAI (NVIDIA)
+    let aiText = data.choices[0].message.content.trim();
 
     // Pembersihan JSON yang ketat (Anti-Ngebug)
     const jsonMatch = aiText.match(/\{[\s\S]*\}/);
