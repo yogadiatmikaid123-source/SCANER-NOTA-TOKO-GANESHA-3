@@ -13,13 +13,12 @@ exports.processReceipt = async (req, res) => {
       });
     }
 
-    // Inisialisasi SDK Resmi Google
-    const genAI = new GoogleGenerativeAI("AQ.Ab8RN6Jt6ija_3G78TtJ0Upvil1L3AQEvrl5VuZjUyaGzR3pog");
-    const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+    const apiKey = "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";
+    const endpoint = `https://integrate.api.nvidia.com/v1/chat/completions`;
 
     const promptText = `Ekstrak informasi dari nota belanja ini. 
 Kembalikan HANYA dalam format JSON murni yang valid.
-ATURAN WAJIB: Anda HARUS menggunakan tanda kutip ganda (") untuk semua nama properti/key dan value string.
+ATURAN WAJIB: Anda HARUS menggunakan tanda kutip ganda (") untuk semua nama properti/key dan value string. Dilarang menggunakan kutip tunggal (') atau tanpa kutip pada properti.
 
 Contoh format yang Benar:
 {"toko": "Nama", "tanggal": "12/12/2023", "total": 50000}
@@ -32,18 +31,49 @@ Struktur yang diminta:
 }
 Jangan tambahkan penjelasan apapun, keluarkan JSON saja.`;
 
-    const imagePart = {
-      inlineData: {
-        data: image,
-        mimeType: "image/jpeg"
-      }
+    const requestBody = {
+      model: "meta/llama-3.2-11b-vision-instruct",
+      messages: [
+        {
+          role: "user",
+          content: [
+            { type: "text", text: promptText },
+            {
+              type: "image_url",
+              image_url: {
+                url: `data:image/jpeg;base64,${image}`
+              }
+            }
+          ]
+        }
+      ],
+      max_tokens: 1024,
+      temperature: 0.1,
+      top_p: 0.95
     };
 
-    // Panggil API Gemini menggunakan SDK
-    const result = await model.generateContent([promptText, imagePart]);
-    const responseText = result.response.text();
+    // Panggil API NVIDIA
+    const response = await fetch(endpoint, {
+      method: 'POST',
+      headers: { 
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${apiKey}`
+      },
+      body: JSON.stringify(requestBody)
+    });
 
-    let aiText = responseText.trim();
+    if (!response.ok) {
+      if (response.status === 429) {
+        throw new Error('Server AI sedang sibuk (Rate Limit NVIDIA). Coba beberapa saat lagi.');
+      }
+      const errorData = await response.json().catch(() => ({}));
+      throw new Error(errorData.error?.message || `Gagal terhubung ke NVIDIA API. Status: ${response.status}`);
+    }
+
+    const data = await response.json();
+    
+    // Format response NVIDIA
+    let aiText = data.choices[0].message.content.trim();
 
     // Pembersihan JSON yang lebih agresif (Anti-Ngebug)
     const jsonMatch = aiText.match(/\{[\s\S]*\}/);
