@@ -122,7 +122,8 @@ function handleFile(file) {
 }
 
 function compressAndQueue(img) {
-    const MAX_WIDTH = 800;
+    // TINGKATKAN RESOLUSI: Dari 800px menjadi 2000px agar tulisan dot-matrix tidak hancur
+    const MAX_WIDTH = 2000;
     const scale = Math.min(MAX_WIDTH / img.width, 1);
     
     hiddenCanvas.width = img.width * scale;
@@ -130,7 +131,8 @@ function compressAndQueue(img) {
     const ctx = hiddenCanvas.getContext('2d');
     ctx.drawImage(img, 0, 0, hiddenCanvas.width, hiddenCanvas.height);
     
-    const base64Image = hiddenCanvas.toDataURL('image/jpeg', 0.5).split(',')[1];
+    // TINGKATKAN KUALITAS: Dari 0.5 (buram) menjadi 0.9 (tajam)
+    const base64Image = hiddenCanvas.toDataURL('image/jpeg', 0.9).split(',')[1];
     
     const tempId = generateId();
     addLoadingRow(tempId); // Memunculkan loading di UI
