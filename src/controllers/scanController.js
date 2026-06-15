@@ -47,11 +47,11 @@ Jangan tambahkan penjelasan apapun, keluarkan JSON saja.`;
           ]
         }
       ],
-      max_tokens: 65536,
-      temperature: 0.6,
+      max_tokens: 1024,
+      temperature: 0.1,
       top_p: 0.95,
-      // extra_body sesuai skrip python
-      extra_body: { chat_template_kwargs: { enable_thinking: true }, reasoning_budget: 16384 }
+      // Matikan fitur "berpikir" yang berat agar respons instan
+      extra_body: { chat_template_kwargs: { enable_thinking: false }, reasoning_budget: 0 }
     };
 
     // Panggil API NVIDIA
