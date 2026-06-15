@@ -10,6 +10,7 @@ const grandTotalEl = document.getElementById('grandTotal');
 const hiddenCanvas = document.getElementById('hiddenCanvas');
 const aiIndicator = document.getElementById('aiIndicator');
 const aiStatusText = document.getElementById('aiStatusText');
+const exportBtn = document.getElementById('exportBtn');
 
 // --- State Management ---
 // Membaca data tersimpan di localStorage (seperti versi lama)
@@ -38,6 +39,39 @@ dropZone.addEventListener('click', (e) => {
 });
 uploadBtn.addEventListener('click', () => fileInput.click());
 cameraBtn.addEventListener('click', () => cameraInput.click());
+
+exportBtn.addEventListener('click', () => {
+    if (scannedData.length === 0) {
+        Swal.fire({
+            icon: 'info',
+            title: 'Data Kosong',
+            text: 'Belum ada nota yang di-scan untuk diekspor.'
+        });
+        return;
+    }
+
+    // Membuat header CSV
+    let csvContent = "data:text/csv;charset=utf-8,";
+    csvContent += "No,Toko,Tanggal,Total\n";
+
+    // Memasukkan isi data
+    scannedData.forEach(row => {
+        // Bersihkan koma di nama toko agar format CSV tidak rusak
+        const toko = (row.Toko || "").toString().replace(/,/g, " ");
+        const tanggal = (row.Tanggal || "").toString().replace(/,/g, " ");
+        const total = row.Total || 0;
+        csvContent += `${row.No},"${toko}","${tanggal}",${total}\n`;
+    });
+
+    // Men-trigger unduhan file CSV (Bisa dibuka di Excel)
+    const encodedUri = encodeURI(csvContent);
+    const link = document.createElement("a");
+    link.setAttribute("href", encodedUri);
+    link.setAttribute("download", "Rekap_Nota_AI.csv");
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+});
 
 dropZone.addEventListener('dragover', (e) => {
     e.preventDefault();
